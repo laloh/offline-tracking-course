@@ -12,7 +12,15 @@ const port = process.env.PORT || 8001;
 
 // API Endpoints
 app.get('/api/courses', (req, res) => {
-    res.status(200).send('Hello World');
+    const sql = `SELECT * FROM courses`;
+    
+    // return rows in json
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            throw err;
+        }
+        res.json(rows);
+    });
 });
 
 app.post('/api/courses', (req, res) => {
@@ -23,9 +31,18 @@ app.post('/api/courses', (req, res) => {
     const sql = `INSERT INTO courses (name, path, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?)`;
     const params = [name, path, description, createdAt, updatedAt];
     
-    db.run(sql, params);
-
-    res.status(201).send('Hello World');
+    db.run(sql, params, function(err, result) {
+        if (!err) {
+            res.json({
+                id: this.lastID,
+                name,
+                path,
+                description,
+                createdAt,
+                updatedAt
+            })
+        }
+    });
 });
 
 
