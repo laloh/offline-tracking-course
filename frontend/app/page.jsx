@@ -1,5 +1,18 @@
+import Header from "./components/Header";
+import Cards from "./components/Cards";
+
 export default function HomePage() {
-    return (
-        <h1 className="text-3xl font-bold underline">Hello change</h1>
-    )
-} 
+  return (
+    <>
+      <Header />
+      <div class="container m-auto grid grid-cols-3 gap-4">
+        <Cards />
+        <Cards />
+        <Cards />
+        <Cards />
+        <Cards />
+        <Cards />
+      </div>
+    </>
+  );
+}

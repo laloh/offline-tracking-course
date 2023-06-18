@@ -10,7 +10,7 @@ export default function Header() {
             </h1>
 
             <p class="mt-1.5 text-sm text-gray-500">
-              Let's write post! 🎉
+              Let's keep Learning! 🎉
             </p>
           </div>
 
