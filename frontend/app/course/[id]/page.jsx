@@ -1,15 +1,16 @@
-import SideMenu from "@/app/components/SideMenu";
+import React from 'react';
+import SideMenu from '@/app/components/SideMenu';
+import VideoPlayer from '@/app/components/VideoPlayer';
 
 export default function Course({ course }) {
   return (
-    <>
-        <div className="flex">
-      <div className="w-4/10 bg-red-500">
-    <SideMenu />
-    </div>
-      <div className="w-6/10 bg-blue-500">
+    <div className="flex">
+      <SideMenu />
+      <div className="flex items-center justify-center flex-grow">
+        <div className="mx-auto w-3/4 h-3/4">
+          <VideoPlayer />
+        </div>
       </div>
     </div>
-    </>
   );
 }
