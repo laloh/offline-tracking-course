@@ -1,3 +1,4 @@
+import Link from "next/link";
 
 export default function Header() {
   return (
@@ -10,7 +11,7 @@ export default function Header() {
             </h1>
 
             <p class="mt-1.5 text-sm text-gray-500">
-              Let's keep Learning! 🎉
+              Happy Learning! 🎉
             </p>
           </div>
 
@@ -19,7 +20,9 @@ export default function Header() {
               class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 px-5 py-3 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring"
               type="button"
             >
-              <span class="text-sm font-medium"> View Website </span>
+              <Link href="/">
+                <span class="text-sm font-medium"> Courses </span>
+              </Link>
 
               <svg
                 xmlns="http://www.w3.org/2000/svg"
