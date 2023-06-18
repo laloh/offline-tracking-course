@@ -2,7 +2,10 @@ import Link from "next/link";
 
 export default function Cards() {
   return (
-    <Link href="/course/1" class="block rounded-lg p-4 shadow-sm shadow-indigo-100">
+    <Link
+      href="/course/1"
+      class="block rounded-lg p-4 shadow-sm shadow-indigo-100"
+    >
       <img
         alt="Home"
         src="https://images.unsplash.com/photo-1613545325278-f24b0cae1224?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
@@ -23,6 +26,25 @@ export default function Cards() {
             <dd class="font-medium">123 Wallaby Avenue, Park Road</dd>
           </div>
         </dl>
+        <div>
+          <div>
+            <span id="ProgressLabel" class="sr-only">
+              Loading
+            </span>
+
+            <span
+              role="progressbar"
+              aria-labelledby="ProgressLabel"
+              aria-valuenow="75"
+              class="block rounded-full bg-gray-200"
+            >
+              <span
+                class="block h-3 rounded-full bg-indigo-600"
+                style={{ width: "75%" }}
+              ></span>
+            </span>
+          </div>
+        </div>
 
         <div class="mt-6 flex items-center gap-8 text-xs">
           <div class="sm:inline-flex sm:shrink-0 sm:items-center sm:gap-2">
@@ -42,9 +64,9 @@ export default function Cards() {
             </svg>
 
             <div class="mt-1.5 sm:mt-0">
-              <p class="text-gray-500">Parking</p>
+              <p class="text-gray-500">Progress</p>
 
-              <p class="font-medium">2 spaces</p>
+              <p class="font-medium">75%</p>
             </div>
           </div>
 
@@ -65,9 +87,9 @@ export default function Cards() {
             </svg>
 
             <div class="mt-1.5 sm:mt-0">
-              <p class="text-gray-500">Bathroom</p>
+              <p class="text-gray-500">Duration</p>
 
-              <p class="font-medium">2 rooms</p>
+              <p class="font-medium">24 Hours</p>
             </div>
           </div>
 
@@ -88,9 +110,9 @@ export default function Cards() {
             </svg>
 
             <div class="mt-1.5 sm:mt-0">
-              <p class="text-gray-500">Bedroom</p>
+              <p class="text-gray-500">Content</p>
 
-              <p class="font-medium">4 rooms</p>
+              <p class="font-medium">45 Videos</p>
             </div>
           </div>
         </div>

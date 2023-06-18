@@ -1,6 +1,14 @@
+'use client';
+
+import { useState } from "react";
 import Link from "next/link";
+import Modal from "./Modal"
 
 export default function Header() {
+  const [showMyModal, setShowMyModal] = useState(false);
+
+  const handleOnClose = () => setShowMyModal(false)
+
   return (
     <header>
       <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -43,12 +51,14 @@ export default function Header() {
             <button
               class="block rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring"
               type="button"
+              onClick={() => setShowMyModal(true)}
             >
              Add new Course 
             </button>
           </div>
         </div>
       </div>
+      <Modal visible={showMyModal} onClose={handleOnClose}/>
     </header>
   );
 }
