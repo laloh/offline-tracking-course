@@ -1,0 +1,17 @@
+{
+  "name": "offline-tracking-course",
+  "version": "1.0.0",
+  "description": "Track your course progress offline",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6"
+  }
+}
