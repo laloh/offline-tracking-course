@@ -58,7 +58,8 @@ app.post("/api/courses", (req, res) => {
 
         for (const video of videos) {
           await new Promise((resolve, reject) => {
-            db.run(insertSql, [video, video, this.lastID], (err, result) => {
+            const videoUrl = `${path}/${video}`;
+            db.run(insertSql, [video, videoUrl, this.lastID], (err, result) => {
               if (!err) {
                 console.log(`video ${video} added to database`);
                 resolve();
