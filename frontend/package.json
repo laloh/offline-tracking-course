@@ -11,6 +11,7 @@
   "dependencies": {
     "@vidstack/react": "^0.6.13",
     "autoprefixer": "^10.4.14",
+    "axios": "^1.4.0",
     "eslint": "8.43.0",
     "eslint-config-next": "13.4.6",
     "next": "13.4.6",

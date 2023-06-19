@@ -2,10 +2,13 @@ import express from "express";
 import bodyParser from "body-parser";
 import db from "./database.js";
 import { promises as fsPromises } from "fs";
+import {default as cors} from "cors";
 
 // App Config
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
+
 
 const port = process.env.PORT || 8001;
 
@@ -37,6 +40,8 @@ app.post("/api/courses", (req, res) => {
   const { name, path, description } = req.body;
   const createdAt = new Date();
   const updatedAt = new Date();
+
+  console.log(req.body)
 
   const sql = `INSERT INTO courses (name, path, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?)`;
   const params = [name, path, description, createdAt, updatedAt];

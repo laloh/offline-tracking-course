@@ -1,11 +1,51 @@
+import {useRef} from "react";
+import { default as axios } from "axios";
+
 export default function Modal({ visible, onClose }) {
   if (!visible) return null;
+  
+  const inputPath = useRef(null);
+  const inputName = useRef(null);
+  const inputDesc = useRef(null);
+
+  function handledClick() {
+    const files = inputPath.current.value;
+    const name = inputName.current.value;
+    const desc = inputDesc.current.value;
+    
+    axios.post("http://localhost:8001/api/courses", {
+      name: name,
+      description: desc,
+      path: files,
+    }).then((res) => {
+      console.log(res);
+    }).catch((err) => {
+      console.log(err);
+    })
+  }
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex items-center justify-center">
       <div className="bg-white p-2 rounded w-72">
         <h1 className="font-semibold text-center text-xl text-gray-700">
           New Course
         </h1>
+        <div>
+          <label
+            for="coursePath"
+            class="block text-xs font-medium text-gray-700"
+          >
+            Path
+          </label>
+
+          <input
+            type="text"
+            id="courscoursePathName"
+            placeholder="i.e. /home/user/rocket-science-101"
+            class="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+            ref={inputPath}
+          />
+        </div>
 
         <div>
           <label
@@ -20,28 +60,8 @@ export default function Modal({ visible, onClose }) {
             id="courseName"
             placeholder="i.e. Rocket Science 101"
             class="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+            ref={inputName}
           />
-        </div>
-
-        <div>
-          <label
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            for="file_input"
-          >
-            Upload file
-          </label>
-          <input
-            class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-            aria-describedby="file_input_help"
-            id="folderInput" webkitdirectory directory multiple
-            type="file"
-          />
-          <p
-            class="mt-1 text-sm text-gray-500 dark:text-gray-300"
-            id="file_input_help"
-          >
-            SVG, PNG, JPG or GIF (MAX. 800x400px).
-          </p>
         </div>
 
         <div>
@@ -56,11 +76,12 @@ export default function Modal({ visible, onClose }) {
             id="courseDescription"
             placeholder="i.e. Learn the basics of rocket science."
             class="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+            ref={inputDesc}
           />
         </div>
 
         <button
-          onClick={onClose}
+          onClick={() => {handledClick(); onClose();}}
           class="bg-blue-500 hover:bg-blue-500 text-white font-bold py-2 px-4 border border-blue-500 rounded"
         >
           {" "}
