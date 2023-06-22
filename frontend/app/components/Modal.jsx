@@ -50,7 +50,7 @@ export default function Modal({ visible, onClose }) {
         </h1>
         <div>
           <label
-            for="coursePath"
+            htmlFor="coursePath"
             className="block text-xs font-medium text-gray-700"
           >
             Path
@@ -67,7 +67,7 @@ export default function Modal({ visible, onClose }) {
 
         <div>
           <label
-            for="courseName"
+            htmlFor="courseName"
             className="block text-xs font-medium text-gray-700"
           >
             Name
@@ -83,7 +83,7 @@ export default function Modal({ visible, onClose }) {
         </div>
         <div>
           <label
-            for="courseImage"
+            htmlFor="courseImage"
             className="block text-xs font-medium text-gray-700"
           >
             Image
@@ -99,7 +99,7 @@ export default function Modal({ visible, onClose }) {
 
         <div>
           <label
-            for="courseDescription"
+            htmlFor="courseDescription"
             className="block text-xs font-medium text-gray-700"
           >
             Description (optional)
