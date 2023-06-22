@@ -12,7 +12,7 @@ export default function HomePage() {
 
   return (
     <>
-      <div class="container m-auto grid grid-cols-3 gap-4">
+      <div className="container m-auto grid grid-cols-3 gap-4">
 
         {courses.map((course) => (
           <Cards key={course.id} {...course}/>
