@@ -1,29 +1,47 @@
-import {useRef} from "react";
+import { useRef } from "react";
 import { default as axios } from "axios";
 
 export default function Modal({ visible, onClose }) {
   if (!visible) return null;
-  
+
   const inputPath = useRef(null);
   const inputName = useRef(null);
   const inputDesc = useRef(null);
+  const inputImage = useRef(null);
 
   function handledClick() {
     const files = inputPath.current.value;
     const name = inputName.current.value;
     const desc = inputDesc.current.value;
-    
-    axios.post("http://localhost:8001/api/courses", {
-      name: name,
-      description: desc,
-      path: files,
-    }).then((res) => {
-      console.log(res);
-    }).catch((err) => {
-      console.log(err);
-    })
+    const image = inputImage.current.files[0];
+
+    const formData = new FormData();
+    formData.append("image", image);
+
+    try {
+      fetch('http://localhost:8001/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
+    axios
+      .post("http://localhost:8001/api/courses", {
+        name: name,
+        description: desc,
+        path: files,
+        image: image.name,
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex items-center justify-center">
       <div className="bg-white p-2 rounded w-72">
@@ -63,6 +81,21 @@ export default function Modal({ visible, onClose }) {
             ref={inputName}
           />
         </div>
+        <div>
+          <label
+            for="courseImage"
+            className="block text-xs font-medium text-gray-700"
+          >
+            Image
+          </label>
+
+          <input
+            class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+            id="courseImage"
+            type="file"
+            ref={inputImage}
+          />
+        </div>
 
         <div>
           <label
@@ -81,7 +114,10 @@ export default function Modal({ visible, onClose }) {
         </div>
 
         <button
-          onClick={() => {handledClick(); onClose();}}
+          onClick={() => {
+            handledClick();
+            onClose();
+          }}
           className="bg-blue-500 hover:bg-blue-500 text-white font-bold py-2 px-4 border border-blue-500 rounded"
         >
           {" "}
