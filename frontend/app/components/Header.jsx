@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import Modal from "./Modal"
+import Modal from "./Modal";
 
 export default function Header() {
   const [showMyModal, setShowMyModal] = useState(false);
 
-  const handleOnClose = () => setShowMyModal(false)
+  const handleOnClose = () => setShowMyModal(false);
 
   return (
     <header>
@@ -18,9 +18,7 @@ export default function Header() {
               Welcome Back, Lalo!
             </h1>
 
-            <p className="mt-1.5 text-sm text-gray-500">
-              Happy Learning! 🎉
-            </p>
+            <p className="mt-1.5 text-sm text-gray-500">Happy Learning! 🎉</p>
           </div>
 
           <div className="mt-4 flex flex-col gap-4 sm:mt-0 sm:flex-row sm:items-center">
@@ -53,12 +51,12 @@ export default function Header() {
               type="button"
               onClick={() => setShowMyModal(true)}
             >
-             Add new Course 
+              Add new Course
             </button>
           </div>
         </div>
       </div>
-      <Modal visible={showMyModal} onClose={handleOnClose}/>
+      <Modal visible={showMyModal} onClose={handleOnClose} />
     </header>
   );
 }
