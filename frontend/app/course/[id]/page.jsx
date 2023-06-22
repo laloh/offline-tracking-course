@@ -2,6 +2,9 @@ import React from 'react';
 import SideMenu from '@/app/components/SideMenu';
 import VideoPlayer from '@/app/components/VideoPlayer';
 
+
+// TODO: Add Next and Previos buttons here
+
 export default function Course({ course }) {
   return (
     <div className="flex">
