@@ -6,11 +6,10 @@ import { useState, useEffect } from "react";
 export default function SideMenu({ courseId, onVideoSelection }) {
   const [videos, setVideos] = useState([]);
 
-  const onVideoSelected = (videoUrl) => {
+  const onVideoSelected = (videoUrl, videoName) => {
     // Notify the parent component
-    onVideoSelection(videoUrl);
+    onVideoSelection(videoUrl, videoName);
   };
-
 
   const fetchData = async () => {
     return axios.get(`http://localhost:8001/api/courses/${courseId}/videos`);
@@ -50,7 +49,7 @@ export default function SideMenu({ courseId, onVideoSelection }) {
                   htmlFor={`checkbox-${index}`}
                   className="w-full py-2 ml-1 text-sm font-medium text-gray-900 dark:text-black-300"
                 >
-                  <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline" onClick={() =>onVideoSelected(video.url)}>{video.title}</a>
+                  <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline" onClick={() =>onVideoSelected(video.url, video.title)}>{video.title}</a>
 
                 </label>
               </div>

@@ -7,27 +7,25 @@ import VideoPlayer from '@/app/components/VideoPlayer';
 export default function Course({params}) {
 
   const [videoUrl, setVideoUrl] = useState(null);
+  const [videoName, setVideoName] = useState(null);
   const [loading, setLoading] = useState(false);
   const id = params.id;
 
-
-  const handleVideoSelection = (url) => {
+  const handleVideoSelection = (url, name) => {
     setLoading(true);
     setTimeout(() => {
       setVideoUrl(url);
+      setVideoName(name);
       setLoading(false);
     }, 2000); 
   };
-  
-
   
   return (
     <div className="flex">
       <SideMenu courseId={id} onVideoSelection={handleVideoSelection}/>
       <div className="flex items-center justify-center flex-grow">
         <div className="mx-auto w-3/4 h-3/4">
-          {/* {videoUrl && <VideoPlayer url={videoUrl} />} */}
-          {loading ? <div>Loading...</div> : videoUrl && <VideoPlayer url={videoUrl}/>}
+          {loading ? <div>Loading...</div> : videoUrl && <VideoPlayer url={videoUrl} name={videoName}/>}
         </div>
       </div>
     </div>

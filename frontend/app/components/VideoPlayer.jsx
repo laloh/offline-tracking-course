@@ -11,11 +11,11 @@ import {
 
 export default function VideoPlayer({
   url,
-  videoName = "Default Name Video",
+  name
 }) {
   return (
     <>
-      <h1 className="text-2x font-bold text-gray-900 sm:text-3xl">{videoName}</h1>
+      <h1 className="text-2x font-bold text-gray-900 sm:text-3xl">{name}</h1>
 
       <MediaPlayer
         title={url}
