@@ -10,7 +10,7 @@ import {
 } from "@vidstack/react";
 
 export default function VideoPlayer({
-  video,
+  url,
   videoName = "Default Name Video",
 }) {
   return (
@@ -18,8 +18,8 @@ export default function VideoPlayer({
       <h1 className="text-2x font-bold text-gray-900 sm:text-3xl">{videoName}</h1>
 
       <MediaPlayer
-        title="Sprite Fight"
-        src="http://localhost:8001/videos/TheFullStackCourse/lesson12.mp4"
+        title={url}
+        src={url}
         crossorigin=""
       >
         <MediaOutlet/>
