@@ -135,5 +135,13 @@ app.get("/images/:filename", (req, res) => {
   res.sendFile(imagePath); // Se
 });
 
+app.get("/videos/:courseName/:videoId", (req, res) => {
+  const { courseName, videoId } = req.params;
+  console.log(courseName, videoId)
+  const videoPath = path.resolve("./media", courseName, videoId);
+
+  res.sendFile(videoPath);
+});
+
 // Listener
 app.listen(port, () => console.log(`listening on localhost: ${port}`));
