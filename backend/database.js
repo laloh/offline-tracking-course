@@ -27,7 +27,7 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     title VARCHAR(255) NOT NULL,
                     url VARCHAR(255) NOT NULL,
-                    status VARCHAR(255) NOT NULL DEFAULT 'pending',
+                    watched BOOLEAN NOT NULL DEFAULT false,
                     course_id INT NOT NULL,
                     FOREIGN KEY (course_id) REFERENCES courses(id))`,
             (err) => {

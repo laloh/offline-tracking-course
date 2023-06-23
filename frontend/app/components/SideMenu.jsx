@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 
 export default function SideMenu({ courseId, onVideoSelection }) {
   const [videos, setVideos] = useState([]);
+  const [checkedStatus, setCheckedStatus] = useState([]);
+  
 
   const onVideoSelected = (videoUrl, videoName) => {
     // Notify the parent component
@@ -15,21 +17,34 @@ export default function SideMenu({ courseId, onVideoSelection }) {
     return axios.get(`http://localhost:8001/api/courses/${courseId}/videos`);
   };
 
+  const handleCheckboxChange = (index, videoId, courseId) => {
+    setCheckedStatus(checkedStatus.map((value, i) => i === index ? !value : value));
+
+    // Change db record to true or false
+    const watched = checkedStatus[index] ? 0 : 1;
+    axios.put(`http://localhost:8001/course/video`, {
+      courseId: courseId,
+      videoId: videoId,
+      watched: watched
+    });
+  };
+
   useEffect(() => {
     fetchData().then((res) => {
-      setVideos(
-        res.data.sort((a, b) => {
-          let stringA = String(a.title);
-          let stringB = String(b.title);
+      const sortedVideos = res.data.sort((a, b) => {
+        let stringA = String(a.title);
+        let stringB = String(b.title);
 
-          // Extract the numbers from the filenames
-          let numA = parseInt(stringA.match(/\d+/));
-          let numB = parseInt(stringB.match(/\d+/));
+        // Extract the numbers from the filenames
+        let numA = parseInt(stringA.match(/\d+/));
+        let numB = parseInt(stringB.match(/\d+/));
 
-          // Compare the numbers
-          return numA - numB;
-        })
-      );
+        // Compare the numbers
+        return numA - numB;
+      });
+
+      setVideos(sortedVideos);
+      setCheckedStatus(sortedVideos.map((video) => video.watched === 1 ? true : false));
     });
   }, [courseId]);
 
@@ -44,6 +59,8 @@ export default function SideMenu({ courseId, onVideoSelection }) {
                   id={`checkbox-${index}`}
                   type="checkbox"
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  checked={checkedStatus[index]}
+                  onChange={() => handleCheckboxChange(index, video.id, video.course_id)}
                 />
                 <label
                   htmlFor={`checkbox-${index}`}

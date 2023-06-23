@@ -5,6 +5,7 @@ import { promises as fsPromises } from "fs";
 import { default as cors } from "cors";
 import multer from "multer";
 import path from "path";
+import { log } from "console";
 
 // App Config
 const app = express();
@@ -137,10 +138,29 @@ app.get("/images/:filename", (req, res) => {
 
 app.get("/videos/:courseName/:videoId", (req, res) => {
   const { courseName, videoId } = req.params;
-  console.log(courseName, videoId)
   const videoPath = path.resolve("./media", courseName, videoId);
 
   res.sendFile(videoPath);
+});
+
+
+app.put("/course/video", (req, res) => {
+  const { courseId, videoId, watched } = req.body
+  
+
+  const sql = `UPDATE videos SET watched = ? WHERE id = ? and course_id = ?`;
+  console.log(courseId, videoId, watched);
+  db.run(sql, [watched, videoId, courseId], function (err, result) {
+    if (!err) {
+      res.json({
+        id: this.lastID,
+        watched,
+      });
+    } else {
+      console.log(err);
+    }
+  });
+
 });
 
 // Listener
