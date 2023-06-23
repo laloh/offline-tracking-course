@@ -20,7 +20,7 @@ export default function Modal({ visible, onClose }) {
 
     try {
       fetch('http://localhost:8001/api/upload', {
-        method: 'POST',
+      method: 'POST',
         body: formData
       });
     } catch (error) {

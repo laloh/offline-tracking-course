@@ -5,10 +5,12 @@ import VideoPlayer from '@/app/components/VideoPlayer';
 
 // TODO: Add Next and Previos buttons here
 
-export default function Course({ course }) {
+export default function Course({params}) {
+  const id = params.id;
+  
   return (
     <div className="flex">
-      <SideMenu />
+      <SideMenu courseId={id}/>
       <div className="flex items-center justify-center flex-grow">
         <div className="mx-auto w-3/4 h-3/4">
           <VideoPlayer />

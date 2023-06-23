@@ -1,13 +1,39 @@
-export default function SideMenu({ course }) {
-  const items = Array.from(Array(40).keys()).map(
-    (index) => `${index}. Default Video Name`
-  );
+"use client";
+
+import axios from "axios";
+import { useState, useEffect } from "react";
+
+export default function SideMenu({ courseId }) {
+  const [videos, setVideos] = useState([]);
+  useEffect(() => {}, []);
+
+  const fetchData = async () => {
+    return axios.get(`http://localhost:8001/api/courses/${courseId}/videos`);
+  };
+
+  useEffect(() => {
+    fetchData().then((res) => {
+      setVideos(
+        res.data.sort((a, b) => {
+          let stringA = String(a.title);
+          let stringB = String(b.title);
+
+          // Extract the numbers from the filenames
+          let numA = parseInt(stringA.match(/\d+/));
+          let numB = parseInt(stringB.match(/\d+/));
+
+          // Compare the numbers
+          return numA - numB;
+        })
+      );
+    });
+  }, []);
 
   return (
     <div className="flex h-screen flex-col justify-between border-e bg-white">
       <div className="px-4 py-6">
         <ul className="mt-6 space-y-1">
-          {items.map((item, index) => (
+          {videos.map((video, index) => (
             <li key={index}>
               <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
                 <input
@@ -21,7 +47,7 @@ export default function SideMenu({ course }) {
                   htmlFor="bordered-checkbox-1"
                   className="w-full py-2 ml-1 text-sm font-medium text-gray-900 dark:text-black-300"
                 >
-                  {item}
+                  {video.title}
                 </label>
               </div>
             </li>
