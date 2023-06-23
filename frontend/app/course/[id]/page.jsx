@@ -11,6 +11,8 @@ export default function Course({params}) {
   return (
     <div className="flex">
       <SideMenu courseId={id}/>
+      {/* Add VideoPlayer here depending on the route */}
+
       <div className="flex items-center justify-center flex-grow">
         <div className="mx-auto w-3/4 h-3/4">
           <VideoPlayer />

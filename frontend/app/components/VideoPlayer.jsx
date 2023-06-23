@@ -7,7 +7,6 @@ import {
   MediaCommunitySkin,
   MediaOutlet,
   MediaPlayer,
-  MediaPoster,
 } from "@vidstack/react";
 
 export default function VideoPlayer({
@@ -20,27 +19,10 @@ export default function VideoPlayer({
 
       <MediaPlayer
         title="Sprite Fight"
-        src="https://stream.mux.com/VZtzUzGRv02OhRnZCxcNg49OilvolTqdnFLEqBsTwaxU/low.mp4"
-        poster="https://image.mux.com/VZtzUzGRv02OhRnZCxcNg49OilvolTqdnFLEqBsTwaxU/thumbnail.webp?time=268&width=980"
-        thumbnails="https://media-files.vidstack.io/sprite-fight/thumbnails.vtt"
+        src="http://localhost:8001/videos/TheFullStackCourse/lesson12.mp4"
         crossorigin=""
       >
-        <MediaOutlet>
-          <MediaPoster alt="Girl walks into sprite gnomes around her friend on a campfire in danger!" />
-          <track
-            src="https://media-files.vidstack.io/sprite-fight/subs/english.vtt"
-            label="English"
-            srcLang="en-US"
-            kind="subtitles"
-            default
-          />
-          <track
-            src="https://media-files.vidstack.io/sprite-fight/chapters.vtt"
-            srcLang="en-US"
-            kind="chapters"
-            default
-          />
-        </MediaOutlet>
+        <MediaOutlet/>
         <MediaCommunitySkin />
       </MediaPlayer>
       <div className="flex">
