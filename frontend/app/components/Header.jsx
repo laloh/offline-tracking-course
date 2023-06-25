@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Modal from "./Modal";
+import axios from "axios";
 
 export default function Header() {
-  const [showMyModal, setShowMyModal] = useState(false);
 
-  const handleOnClose = () => setShowMyModal(false);
+  const addCourses = async () => {
+    return axios.get("http://localhost:8001/api/media/courses").then((res) => {
+      console.log(res.data);
+    });
+  }
 
   return (
     <header>
@@ -49,14 +52,13 @@ export default function Header() {
             <button
               className="block rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring"
               type="button"
-              onClick={() => setShowMyModal(true)}
+              onClick={addCourses}
             >
               Add new Course
             </button>
           </div>
         </div>
       </div>
-      <Modal visible={showMyModal} onClose={handleOnClose} />
     </header>
   );
 }

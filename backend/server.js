@@ -46,7 +46,6 @@ app.get("/api/media/courses", async (req, res) => {
   const courses = await fsPromises.readdir(mediaPath);
   const directories = courses.filter((course) => course.indexOf(".") === -1);
 
-  
   for (const directory of directories) {
     const files = await fsPromises.readdir(path.resolve("./media", directory));
     const jpg = files.find((file) => file.endsWith(".jpg"));
@@ -54,31 +53,63 @@ app.get("/api/media/courses", async (req, res) => {
 
     const description = "";
     const image = `http://localhost:8001/images/${directory}/${jpg}`;
-    
+
     const createdAt = new Date();
     const updatedAt = new Date();
 
     const sql = `INSERT INTO courses (name, path, description, image, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`;
-    const params = [directory, coursePathName, description, image, createdAt, updatedAt];
-  
+    const params = [
+      directory,
+      coursePathName,
+      description,
+      image,
+      createdAt,
+      updatedAt,
+    ];
+
+    // review if course already exists
+    const courseExists = await new Promise((resolve, reject) => {
+      const sql = `SELECT * FROM courses WHERE name = ?`;
+      db.get(sql, [directory], (err, row) => {
+        if (!err) {
+          if (row) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        } else {
+          reject(err);
+        }
+      });
+    });
+
+    if (courseExists) {
+      console.log(`course ${directory} already exists`);
+      continue;
+    };
+
     db.run(sql, params, async function (err, result) {
       if (!err) {
         try {
           const videos = await listDirectoryFiles(coursePathName);
           const insertSql = `INSERT INTO videos (title, url, course_id) VALUES (?, ?, ?)`;
-  
+
           for (const video of videos) {
             await new Promise((resolve, reject) => {
               const videoUrl = `http://localhost:8001/videos/${directory}/${video}`;
-              db.run(insertSql, [video, videoUrl, this.lastID], (err, result) => {
-                if (!err) {
-                  console.log(`video ${video} added to database`);
-                  resolve();
-                } else {
-                  console.log(err);
-                  reject();
+              db.run(
+                insertSql,
+                [video, videoUrl, this.lastID],
+                (err, result) => {
+                  if (!err) {
+                    console.log(`video ${video} added to database`);
+                    resolve();
+                  } else {
+                    console.log(err);
+                    reject();
+                  }
                 }
-              });
+              );
             });
           }
         } catch (err) {
@@ -91,7 +122,6 @@ app.get("/api/media/courses", async (req, res) => {
   }
 
   res.json({ message: "success" });
-
 });
 
 app.post("/api/courses", (req, res) => {
@@ -102,7 +132,14 @@ app.post("/api/courses", (req, res) => {
   const coursePathName = path.resolve("./media", name);
 
   const sql = `INSERT INTO courses (name, path, description, image, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`;
-  const params = [name, coursePathName, description, image, createdAt, updatedAt];
+  const params = [
+    name,
+    coursePathName,
+    description,
+    image,
+    createdAt,
+    updatedAt,
+  ];
 
   db.run(sql, params, async function (err, result) {
     if (!err) {
