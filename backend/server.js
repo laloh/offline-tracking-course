@@ -50,11 +50,16 @@ app.get("/api/media/courses", async (req, res) => {
     const files = await fsPromises.readdir(path.resolve("./media", directory));
    
     const formats = ['.jpg', '.png', '.gif', '.bmp'];
-    const imgFile = files.find((file) => formats.some((format) => file.endsWith(format)));
+    const imgFile = files.find((file) => formats.some((format) => file.endsWith(format))) || 'defaultCover.png';
 
     const coursePathName = path.resolve("./media", directory);
     const description = "";
-    const image = `http://localhost:8001/images/${directory}/${imgFile}`;
+    
+    if (imgFile === 'defaultCover.png') {
+      const image = `http://localhost:8001/images/default/${imgFile}`;
+    } else {
+      const image = `http://localhost:8001/images/${directory}/${imgFile}`;
+    }
 
     const createdAt = new Date();
     const updatedAt = new Date();

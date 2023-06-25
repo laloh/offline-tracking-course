@@ -1,5 +1,6 @@
+backend/media/*
+!backend/media/default
 
-backend/media/**
 *.sqlite
 
 # Logs
