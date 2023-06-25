@@ -5,7 +5,6 @@ import { promises as fsPromises } from "fs";
 import { default as cors } from "cors";
 import multer from "multer";
 import path from "path";
-import { v4 as uuidv4 } from "uuid";
 
 // App Config
 const app = express();
@@ -43,26 +42,56 @@ app.get("/api/courses", (req, res) => {
 });
 
 app.get("/api/media/courses", async (req, res) => {
-  // read media directory
   const mediaPath = path.resolve("./media");
   const courses = await fsPromises.readdir(mediaPath);
   const directories = courses.filter((course) => course.indexOf(".") === -1);
 
-  const coursesWithVideos = [];
+  
   for (const directory of directories) {
-    const videos = await listDirectoryFiles(`${mediaPath}/${directory}`);
-    const files = await fsPromises.readdir(`${mediaPath}/${directory}`);
+    const files = await fsPromises.readdir(path.resolve("./media", directory));
     const jpg = files.find((file) => file.endsWith(".jpg"));
+    const coursePathName = path.resolve("./media", directory);
 
-    coursesWithVideos.push({
-      id: uuidv4(),
-      name: directory,
-      videos,
-      img: jpg,
+    const description = "";
+    const image = `http://localhost:8001/images/${directory}/${jpg}`;
+    
+    const createdAt = new Date();
+    const updatedAt = new Date();
+
+    const sql = `INSERT INTO courses (name, path, description, image, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`;
+    const params = [directory, coursePathName, description, image, createdAt, updatedAt];
+  
+    db.run(sql, params, async function (err, result) {
+      if (!err) {
+        try {
+          const videos = await listDirectoryFiles(coursePathName);
+          const insertSql = `INSERT INTO videos (title, url, course_id) VALUES (?, ?, ?)`;
+  
+          for (const video of videos) {
+            await new Promise((resolve, reject) => {
+              const videoUrl = `http://localhost:8001/videos/${directory}/${video}`;
+              db.run(insertSql, [video, videoUrl, this.lastID], (err, result) => {
+                if (!err) {
+                  console.log(`video ${video} added to database`);
+                  resolve();
+                } else {
+                  console.log(err);
+                  reject();
+                }
+              });
+            });
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      } else {
+        console.log(err);
+      }
     });
   }
 
-  res.json(coursesWithVideos);
+  res.json({ message: "success" });
+
 });
 
 app.post("/api/courses", (req, res) => {
@@ -113,7 +142,6 @@ app.post("/api/courses", (req, res) => {
     }
   });
 });
-
 
 // Get course's videos
 app.get("/api/courses/:id/videos", (req, res) => {
@@ -170,7 +198,6 @@ app.put("/course/video", (req, res) => {
   const { courseId, videoId, watched } = req.body;
   const sql = `UPDATE videos SET watched = ? WHERE id = ? and course_id = ?`;
 
-  console.log(courseId, videoId, watched);
   db.run(sql, [watched, videoId, courseId], function (err, result) {
     if (!err) {
       res.json({
