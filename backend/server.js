@@ -16,10 +16,11 @@ const port = process.env.PORT || 8001;
 const listDirectoryFiles = async (path) => {
   try {
     const files = await fsPromises.readdir(path);
-    const mp4Files = files.filter((file) => file.endsWith(".mp4"));
+    const formats = ['.mp4', '.mkv', '.mov', '.webm', '.flv'];
+    const videoFiles = files.filter((file) => formats.some((format) => file.endsWith(format)));
 
     // filter only mp4 files
-    return mp4Files;
+    return videoFiles;
   } catch (err) {
     console.error("Unable to read directory:", err);
     throw err;
@@ -47,11 +48,13 @@ app.get("/api/media/courses", async (req, res) => {
 
   for (const directory of directories) {
     const files = await fsPromises.readdir(path.resolve("./media", directory));
-    const jpg = files.find((file) => file.endsWith(".jpg"));
-    const coursePathName = path.resolve("./media", directory);
+   
+    const formats = ['.jpg', '.png', '.gif', '.bmp'];
+    const imgFile = files.find((file) => formats.some((format) => file.endsWith(format)));
 
+    const coursePathName = path.resolve("./media", directory);
     const description = "";
-    const image = `http://localhost:8001/images/${directory}/${jpg}`;
+    const image = `http://localhost:8001/images/${directory}/${imgFile}`;
 
     const createdAt = new Date();
     const updatedAt = new Date();
