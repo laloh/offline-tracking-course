@@ -42,8 +42,7 @@ app.get("/api/courses", (req, res) => {
   });
 });
 
-
-app.get("/api/media/courses", async (req, res) =>{
+app.get("/api/media/courses", async (req, res) => {
   // read media directory
   const mediaPath = path.resolve("./media");
   const courses = await fsPromises.readdir(mediaPath);
@@ -54,34 +53,34 @@ app.get("/api/media/courses", async (req, res) =>{
     const videos = await listDirectoryFiles(`${mediaPath}/${directory}`);
     const files = await fsPromises.readdir(`${mediaPath}/${directory}`);
     const jpg = files.find((file) => file.endsWith(".jpg"));
-    
+
     coursesWithVideos.push({
       id: uuidv4(),
       name: directory,
       videos,
-      img: jpg
+      img: jpg,
     });
   }
 
   res.json(coursesWithVideos);
-
 });
 
 app.post("/api/courses", (req, res) => {
-  const { name, path, description } = req.body;
+  const { name, coursePath, description } = req.body;
   const createdAt = new Date();
   const updatedAt = new Date();
-  const image = `http://localhost:8001/images/${req.body.image}`;
+  const image = `http://localhost:8001/images/${name}/${req.body.image}`;
+  const coursePathName = path.resolve("./media", name);
 
   const sql = `INSERT INTO courses (name, path, description, image, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`;
-  const params = [name, path, description, image, createdAt, updatedAt];
+  const params = [name, coursePathName, description, image, createdAt, updatedAt];
 
   db.run(sql, params, async function (err, result) {
     if (!err) {
       res.json({
         id: this.lastID,
         name,
-        path,
+        coursePathName,
         description,
         image,
         createdAt,
@@ -89,12 +88,12 @@ app.post("/api/courses", (req, res) => {
       });
 
       try {
-        const videos = await listDirectoryFiles(path);
+        const videos = await listDirectoryFiles(coursePathName);
         const insertSql = `INSERT INTO videos (title, url, course_id) VALUES (?, ?, ?)`;
 
         for (const video of videos) {
           await new Promise((resolve, reject) => {
-            const videoUrl = `http://localhost:8001/videos/${name}/${video}`
+            const videoUrl = `http://localhost:8001/videos/${name}/${video}`;
             db.run(insertSql, [video, videoUrl, this.lastID], (err, result) => {
               if (!err) {
                 console.log(`video ${video} added to database`);
@@ -114,6 +113,8 @@ app.post("/api/courses", (req, res) => {
     }
   });
 });
+
+
 // Get course's videos
 app.get("/api/courses/:id/videos", (req, res) => {
   const { id } = req.params;
@@ -122,9 +123,7 @@ app.get("/api/courses/:id/videos", (req, res) => {
     if (err) {
       throw err;
     }
-    res.json(
-      rows
-    );
+    res.json(rows);
   });
 });
 
@@ -157,7 +156,7 @@ app.get("/images/:coursename/:filename", (req, res) => {
   const { filename, coursename } = req.params;
   const imagePath = path.resolve(`./media/${coursename}`, filename);
 
-  res.sendFile(imagePath); 
+  res.sendFile(imagePath);
 });
 
 app.get("/videos/:courseName/:videoId", (req, res) => {
@@ -167,9 +166,8 @@ app.get("/videos/:courseName/:videoId", (req, res) => {
   res.sendFile(videoPath);
 });
 
-
 app.put("/course/video", (req, res) => {
-  const { courseId, videoId, watched } = req.body
+  const { courseId, videoId, watched } = req.body;
   const sql = `UPDATE videos SET watched = ? WHERE id = ? and course_id = ?`;
 
   console.log(courseId, videoId, watched);
@@ -183,7 +181,6 @@ app.put("/course/video", (req, res) => {
       console.log(err);
     }
   });
-
 });
 
 // Listener

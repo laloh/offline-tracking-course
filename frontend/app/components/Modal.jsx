@@ -15,23 +15,20 @@ export default function Modal({ visible, onClose }) {
     const desc = inputDesc.current.value;
     const image = inputImage.current.files[0];
 
-    const formData = new FormData();
-    formData.append("image", image);
-
-    try {
-      fetch('http://localhost:8001/api/upload', {
-      method: 'POST',
-        body: formData
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    // try {
+    //   fetch('http://localhost:8001/api/upload', {
+    //   method: 'POST',
+    //     body: formData
+    //   });
+    // } catch (error) {
+    //   console.error(error);
+    // }
 
     axios
       .post("http://localhost:8001/api/courses", {
         name: name,
         description: desc,
-        path: files,
+        coursePath: files,
         image: image.name,
       })
       .then((res) => {
