@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import db from "./database.js";
 import { promises as fsPromises } from "fs";
 import { default as cors } from "cors";
-import multer from "multer";
 import path from "path";
 
 // App Config
@@ -190,31 +189,6 @@ app.get("/api/courses/:id/videos", (req, res) => {
     }
     res.json(rows);
   });
-});
-
-const storage = multer.diskStorage({
-  destination: "./media",
-  filename: (_req, file, cb) => {
-    cb(null, file.originalname); // Use the original filename
-  },
-});
-
-const upload = multer({ storage });
-
-app.post("/api/upload", upload.single("image"), (req, res) => {
-  try {
-    // Access the uploaded file's information
-    const { originalname, filename, path } = req.file;
-    console.log("Original Name:", originalname);
-    console.log("Stored Filename:", filename);
-    console.log("File Path:", path);
-
-    // File was successfully uploaded
-    return res.status(200).send("File uploaded successfully");
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send(err.message);
-  }
 });
 
 app.get("/images/:coursename/:filename", (req, res) => {
