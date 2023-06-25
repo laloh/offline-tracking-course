@@ -5,7 +5,7 @@ import { promises as fsPromises } from "fs";
 import { default as cors } from "cors";
 import multer from "multer";
 import path from "path";
-import { log } from "console";
+import { v4 as uuidv4 } from "uuid";
 
 // App Config
 const app = express();
@@ -42,7 +42,31 @@ app.get("/api/courses", (req, res) => {
   });
 });
 
-// const absolutePath = path.resolve('./media');
+
+app.get("/api/media/courses", async (req, res) =>{
+  // read media directory
+  const mediaPath = path.resolve("./media");
+  const courses = await fsPromises.readdir(mediaPath);
+  const directories = courses.filter((course) => course.indexOf(".") === -1);
+
+  const coursesWithVideos = [];
+  for (const directory of directories) {
+    const videos = await listDirectoryFiles(`${mediaPath}/${directory}`);
+    const files = await fsPromises.readdir(`${mediaPath}/${directory}`);
+    const jpg = files.find((file) => file.endsWith(".jpg"));
+    
+    coursesWithVideos.push({
+      id: uuidv4(),
+      name: directory,
+      videos,
+      img: jpg
+    });
+  }
+
+  res.json(coursesWithVideos);
+
+});
+
 app.post("/api/courses", (req, res) => {
   const { name, path, description } = req.body;
   const createdAt = new Date();
@@ -129,11 +153,11 @@ app.post("/api/upload", upload.single("image"), (req, res) => {
   }
 });
 
-app.get("/images/:filename", (req, res) => {
-  const { filename } = req.params;
-  const imagePath = path.resolve("./media", filename);
+app.get("/images/:coursename/:filename", (req, res) => {
+  const { filename, coursename } = req.params;
+  const imagePath = path.resolve(`./media/${coursename}`, filename);
 
-  res.sendFile(imagePath); // Se
+  res.sendFile(imagePath); 
 });
 
 app.get("/videos/:courseName/:videoId", (req, res) => {
@@ -146,9 +170,8 @@ app.get("/videos/:courseName/:videoId", (req, res) => {
 
 app.put("/course/video", (req, res) => {
   const { courseId, videoId, watched } = req.body
-  
-
   const sql = `UPDATE videos SET watched = ? WHERE id = ? and course_id = ?`;
+
   console.log(courseId, videoId, watched);
   db.run(sql, [watched, videoId, courseId], function (err, result) {
     if (!err) {

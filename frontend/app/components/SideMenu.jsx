@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 export default function SideMenu({ courseId, onVideoSelection }) {
   const [videos, setVideos] = useState([]);
   const [checkedStatus, setCheckedStatus] = useState([]);
-  
 
   const onVideoSelected = (videoUrl, videoName) => {
     // Notify the parent component

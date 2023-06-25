@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Cards({ course }) {
   const courseHref = `/course/${course.id}`;
- 
+  const courseImg = `http://localhost:8001/images/${course.name}/${course.img}`;
 
   return (
     <Link
@@ -11,7 +11,7 @@ export default function Cards({ course }) {
     >
       <img
         alt="Course"
-        src={course.image}
+        src={courseImg}
         className="h-56 w-full rounded-md object-cover"
       />
 
