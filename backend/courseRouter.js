@@ -134,62 +134,6 @@ router.get("/api/media/courses", async (req, res) => {
   res.json({ message: "success" });
 });
 
-router.post("/api/courses", async (req, res) => {
-  const { name, coursePath, description } = req.body;
-  const createdAt = new Date();
-  const updatedAt = new Date();
-  const image = `http://localhost:8001/images/${name}/${req.body.image}`;
-  const coursePathName = path.resolve("./media", name);
-
-  const sql = `INSERT INTO courses (name, path, description, image, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`;
-  const params = [
-    name,
-    coursePathName,
-    description,
-    image,
-    createdAt,
-    updatedAt,
-  ];
-
-  db.run(sql, params, async function (err, result) {
-    if (!err) {
-      res.json({
-        id: this.lastID,
-        name,
-        coursePathName,
-        description,
-        image,
-        createdAt,
-        updatedAt,
-      });
-
-      try {
-        const videos = await listDirectoryFiles(coursePathName);
-        const insertSql = `INSERT INTO videos (title, url, course_id) VALUES (?, ?, ?)`;
-
-        for (const video of videos) {
-          await new Promise((resolve, reject) => {
-            const videoUrl = `http://localhost:8001/videos/${name}/${video}`;
-            db.run(insertSql, [video, videoUrl, this.lastID], (err, result) => {
-              if (!err) {
-                console.log(`video ${video} added to database`);
-                resolve();
-              } else {
-                console.log(err);
-                reject();
-              }
-            });
-          });
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    } else {
-      console.log(err);
-    }
-  });
-});
-
 router.get("/api/courses/:id/videos", async (req, res) => {
   const { id } = req.params;
   const sql = `SELECT * FROM videos WHERE course_id = ?`;
