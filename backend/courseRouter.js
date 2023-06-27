@@ -157,9 +157,16 @@ router.get("/images/:coursename/:filename", async (req, res) => {
   res.sendFile(imagePath);
 });
 
-router.get("/videos/:courseName/:videoId", async (req, res) => {
-  const { courseName, videoId } = req.params;
-  const videoPath = path.resolve("./media", courseName, videoId);
+router.get("/videos/:courseName/:section?/:videoId", async (req, res) => {
+  const { courseName, section, videoId } = req.params;
+  
+  let videoPath;
+
+  if (section) {
+    videoPath = path.resolve("./media", courseName, section, videoId);
+  } else {
+    videoPath = path.resolve("./media", courseName, videoId);
+  }
 
   res.sendFile(videoPath);
 });
@@ -184,6 +191,7 @@ const MEDIA_PATH = "./media";
 
 // List of video file extensions you want to include
 const VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv"];
+const IMAGE_EXTENSIONS = [".jpg", ".png", ".gif", ".bmp"];
 
 function isVideoFile(filename) {
   return VIDEO_EXTENSIONS.includes(path.extname(filename).toLowerCase());
@@ -196,10 +204,17 @@ router.get("/folders", async (req, res) => {
     const itemPath = path.join(MEDIA_PATH, item);
     return fs.lstatSync(itemPath).isDirectory();
   });
-  
 
   // Map each course directory to a course object
   const courses = courseDirs.map((courseDir) => {
+    // Get the files in the course directory
+    const files = fs.readdirSync(path.join(MEDIA_PATH, courseDir));
+    // filter the first image file
+    const imgFile =
+      files.find((file) =>
+        IMAGE_EXTENSIONS.some((extension) => file.endsWith(extension))
+      ) || "cover.png";
+
     const coursePath = path.join(MEDIA_PATH, courseDir);
     const sections = [];
 
@@ -214,7 +229,7 @@ router.get("/folders", async (req, res) => {
         const videos = fs.readdirSync(sectionPath).filter(isVideoFile);
 
         // Add a section with the directory's name and videos
-        sections.push({ name: sectionDir, videos: videos });
+        sections.push({ name: sectionDir, videos: videos, path: sectionPath });
       } else {
         // If it's not a directory, it's a video in the default section
         // Ignore system files and non-video files
@@ -230,6 +245,7 @@ router.get("/folders", async (req, res) => {
             sections.push({
               name: "default",
               videos: [sectionDir],
+              path: coursePath,
             });
           }
         }
@@ -239,14 +255,14 @@ router.get("/folders", async (req, res) => {
     // Return a course object with the directory's name and sections
     return {
       course: courseDir,
+      img: imgFile,
       sections: sections,
+      path: coursePath,
     };
   });
 
   // Send the courses as the response
   for (const course in courses) {
-    
-    // order names
     courses[course].sections = courses[course].sections.sort((a, b) => {
       let numA = parseInt(a.name.match(/\d+/));
       let numB = parseInt(b.name.match(/\d+/));
@@ -254,13 +270,78 @@ router.get("/folders", async (req, res) => {
     });
 
     for (const section in courses[course].sections) {
-      courses[course].sections[section].videos = 
-        courses[course].sections[section].videos.sort((a, b) => {
-          let numA = parseInt(a.match(/\d+/));
-          let numB = parseInt(b.match(/\d+/));
-          return numA - numB;
-        });
+      courses[course].sections[section].videos = courses[course].sections[
+        section
+      ].videos.sort((a, b) => {
+        let numA = parseInt(a.match(/\d+/));
+        let numB = parseInt(b.match(/\d+/));
+        return numA - numB;
+      });
     }
+  }
+
+  // insert course in database
+  for (const course in courses) {
+    const courseExists = await new Promise((resolve, reject) => {
+      const sql = `SELECT * FROM courses_2 WHERE name = ?`;
+      db.get(sql, [courses[course].course], (err, row) => {
+        if (!err) {
+          if (row) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        } else {
+          reject(err);
+        }
+      });
+    });
+
+    if (courseExists) {
+      console.log(`course ${courses[course].course} already exists`);
+      continue;
+    }
+
+    const sql = `INSERT INTO courses_2 (name, path, image) VALUES (?, ?, ?)`;
+    const params = [
+      courses[course].course,
+      courses[course].path,
+      courses[course].img,
+    ];
+
+    db.run(sql, params, function (err, result) {
+      if (!err) {
+        console.log(`course ${courses[course].course} added to database`);
+
+        // insert sections in database
+        for (const section in courses[course].sections) {
+          for (const video of courses[course].sections[section].videos) {
+            const sql = `INSERT INTO videos_2 (title, section, url, watched, course_id) VALUES (?, ?, ?, ?, ?)`;
+            const url =
+              courses[course].sections[section].name === "default"
+                ? `http://localhost:8001/videos/${courses[course].course}/${video}`
+                : `http://localhost:8001/videos/${courses[course].course}/${courses[course].sections[section].name}/${video}`;
+
+            const params = [
+              video,
+              courses[course].sections[section].name,
+              url,
+              false,
+              this.lastID,
+            ];
+            db.run(sql, params, function (err, result) {
+              if (!err) {
+                console.log(`video ${video} added to database`);
+              } else {
+                console.log(err);
+              }
+            });
+          }
+        }
+      } else {
+        console.log(err);
+      }
+    });
   }
 
   res.json(courses);
