@@ -175,4 +175,68 @@ router.put("/course/video", async (req, res) => {
   });
 });
 
+const readNestedDirectories = async (directoryPath) => {
+  try {
+    const files = await fsPromises.readdir(directoryPath);
+    const videoFormats = ['.mp4', '.mkv', '.mov', '.webm', '.flv'];
+
+    const sections = [];
+    const videos = [];
+
+    for (const file of files) {
+      const filePath = path.join(directoryPath, file);
+      const fileStats = await fsPromises.stat(filePath);
+
+      if (fileStats.isDirectory()) {
+        const sectionVideos = await readNestedDirectories(filePath);
+        if (sectionVideos.length > 0) {
+          sections.push({
+            name: file,
+            videos: sectionVideos,
+          });
+        }
+      } else if (videoFormats.includes(path.extname(file).toLowerCase())) {
+        videos.push(file);
+      }
+    }
+
+    return sections.length > 0 ? sections : videos;
+  } catch (error) {
+    console.error("Error reading directory:", error);
+    return [];
+  }
+};
+
+router.get("/api/media/courses2", async (req, res) => {
+  const mediaPath = path.resolve("./media");
+  const courseList = [];
+
+  try {
+    const courses = await fsPromises.readdir(mediaPath);
+
+    for (const course of courses) {
+      const coursePath = path.join(mediaPath, course);
+      const courseStats = await fsPromises.stat(coursePath);
+
+      if (courseStats.isDirectory()) {
+        const sectionsOrVideos = await readNestedDirectories(coursePath);
+
+        if (sectionsOrVideos.length > 0) {
+          courseList.push({
+            course: course,
+            sections: sectionsOrVideos,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error reading courses:", error);
+  }
+
+  res.json(courseList);
+});
+
+
+
+
 export default router;
