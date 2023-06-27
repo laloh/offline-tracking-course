@@ -2,6 +2,8 @@ import express from 'express';
 import db from "./database.js";
 import path from "path";
 import { promises as fsPromises } from "fs";
+import fs from 'fs';
+
 
 const router = express.Router();
 
@@ -175,68 +177,49 @@ router.put("/course/video", async (req, res) => {
   });
 });
 
-const readNestedDirectories = async (directoryPath) => {
-  try {
-    const files = await fsPromises.readdir(directoryPath);
-    const videoFormats = ['.mp4', '.mkv', '.mov', '.webm', '.flv'];
+const MEDIA_PATH = "./media";
 
-    const sections = [];
-    const videos = [];
+router.get('/folders', async (req, res) => {
+    const courseDirs = fs.readdirSync(MEDIA_PATH).filter(item => {
+        const itemPath = path.join(MEDIA_PATH, item);
+        return fs.lstatSync(itemPath).isDirectory();
+    });
 
-    for (const file of files) {
-      const filePath = path.join(directoryPath, file);
-      const fileStats = await fsPromises.stat(filePath);
+    const courses = courseDirs.map(courseDir => {
+        const coursePath = path.join(MEDIA_PATH, courseDir);
+        const sections = [];
 
-      if (fileStats.isDirectory()) {
-        const sectionVideos = await readNestedDirectories(filePath);
-        if (sectionVideos.length > 0) {
-          sections.push({
-            name: file,
-            videos: sectionVideos,
-          });
-        }
-      } else if (videoFormats.includes(path.extname(file).toLowerCase())) {
-        videos.push(file);
-      }
-    }
+        const sectionDirs = fs.readdirSync(coursePath);
+        sectionDirs.forEach(sectionDir => {
+            const sectionPath = path.join(coursePath, sectionDir);
+            if (fs.lstatSync(sectionPath).isDirectory()) {
+                // If it's a directory, it's a named section
+                const videos = fs.readdirSync(sectionPath).filter(file => !file.startsWith('.'));
+                sections.push({ name: sectionDir, videos: videos });
+            } else {
+                // If it's not a directory, it's a video in the default section
+                if (!sectionDir.startsWith('.')) { // Ignore system files
+                    const defaultSection = sections.find(s => s.name === "default");
+                    if (defaultSection) {
+                        defaultSection.videos.push(sectionDir);
+                    } else {
+                        sections.push({
+                            name: "default",
+                            videos: [sectionDir]
+                        });
+                    }
+                }
+            }
+        });
 
-    return sections.length > 0 ? sections : videos;
-  } catch (error) {
-    console.error("Error reading directory:", error);
-    return [];
-  }
-};
+        return {
+            course: courseDir,
+            sections: sections
+        };
+    });
 
-router.get("/api/media/courses2", async (req, res) => {
-  const mediaPath = path.resolve("./media");
-  const courseList = [];
-
-  try {
-    const courses = await fsPromises.readdir(mediaPath);
-
-    for (const course of courses) {
-      const coursePath = path.join(mediaPath, course);
-      const courseStats = await fsPromises.stat(coursePath);
-
-      if (courseStats.isDirectory()) {
-        const sectionsOrVideos = await readNestedDirectories(coursePath);
-
-        if (sectionsOrVideos.length > 0) {
-          courseList.push({
-            course: course,
-            sections: sectionsOrVideos,
-          });
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Error reading courses:", error);
-  }
-
-  res.json(courseList);
+    res.json(courses);
 });
-
-
 
 
 export default router;

@@ -2,6 +2,7 @@ backend/media/*
 !backend/media/default
 
 *.sqlite
+**/.DS_Store
 
 # Logs
 logs
