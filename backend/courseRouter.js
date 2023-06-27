@@ -1,9 +1,8 @@
-import express from 'express';
+import express from "express";
 import db from "./database.js";
 import path from "path";
 import { promises as fsPromises } from "fs";
-import fs from 'fs';
-
+import fs from "fs";
 
 const router = express.Router();
 
@@ -11,8 +10,10 @@ const router = express.Router();
 const listDirectoryFiles = async (path) => {
   try {
     const files = await fsPromises.readdir(path);
-    const formats = ['.mp4', '.mkv', '.mov', '.webm', '.flv'];
-    const videoFiles = files.filter((file) => formats.some((format) => file.endsWith(format)));
+    const formats = [".mp4", ".mkv", ".mov", ".webm", ".flv"];
+    const videoFiles = files.filter((file) =>
+      formats.some((format) => file.endsWith(format))
+    );
 
     // filter only mp4 files
     return videoFiles;
@@ -54,15 +55,17 @@ router.get("/api/media/courses", async (req, res) => {
 
   for (const directory of directories) {
     const files = await fsPromises.readdir(path.resolve("./media", directory));
-   
-    const formats = ['.jpg', '.png', '.gif', '.bmp'];
-    const imgFile = files.find((file) => formats.some((format) => file.endsWith(format))) || 'cover.png';
+
+    const formats = [".jpg", ".png", ".gif", ".bmp"];
+    const imgFile =
+      files.find((file) => formats.some((format) => file.endsWith(format))) ||
+      "cover.png";
 
     const coursePathName = path.resolve("./media", directory);
     const description = "";
-    
+
     let image = `http://localhost:8001/images/${directory}/${imgFile}`;
-    if (imgFile === 'cover.png') {
+    if (imgFile === "cover.png") {
       image = `http://localhost:8001/images/default/${imgFile}`;
     }
 
@@ -98,7 +101,7 @@ router.get("/api/media/courses", async (req, res) => {
     if (courseExists) {
       console.log(`course ${directory} already exists`);
       continue;
-    };
+    }
 
     db.run(sql, params, async function (err, result) {
       if (!err) {
@@ -179,47 +182,87 @@ router.put("/course/video", async (req, res) => {
 
 const MEDIA_PATH = "./media";
 
-router.get('/folders', async (req, res) => {
-    const courseDirs = fs.readdirSync(MEDIA_PATH).filter(item => {
-        const itemPath = path.join(MEDIA_PATH, item);
-        return fs.lstatSync(itemPath).isDirectory();
+// List of video file extensions you want to include
+const VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv"];
+
+function isVideoFile(filename) {
+  return VIDEO_EXTENSIONS.includes(path.extname(filename).toLowerCase());
+}
+
+router.get("/folders", async (req, res) => {
+  // Read the directories in the MEDIA_PATH
+  // Filter out any items that are not directories
+  const courseDirs = fs.readdirSync(MEDIA_PATH).filter((item) => {
+    const itemPath = path.join(MEDIA_PATH, item);
+    return fs.lstatSync(itemPath).isDirectory();
+  });
+  
+
+  // Map each course directory to a course object
+  const courses = courseDirs.map((courseDir) => {
+    const coursePath = path.join(MEDIA_PATH, courseDir);
+    const sections = [];
+
+    const sectionDirs = fs.readdirSync(coursePath);
+    sectionDirs.forEach((sectionDir) => {
+      const sectionPath = path.join(coursePath, sectionDir);
+
+      // Check if the item is a directory
+      if (fs.lstatSync(sectionPath).isDirectory()) {
+        // If it's a directory, it's a named section
+        // Filter the files in the directory to only include video files
+        const videos = fs.readdirSync(sectionPath).filter(isVideoFile);
+
+        // Add a section with the directory's name and videos
+        sections.push({ name: sectionDir, videos: videos });
+      } else {
+        // If it's not a directory, it's a video in the default section
+        // Ignore system files and non-video files
+        if (!sectionDir.startsWith(".") && isVideoFile(sectionDir)) {
+          // Look for the default section in the sections array
+          const defaultSection = sections.find((s) => s.name === "default");
+
+          // If the default section exists, add the video to it
+          // If it doesn't, create it with the video
+          if (defaultSection) {
+            defaultSection.videos.push(sectionDir);
+          } else {
+            sections.push({
+              name: "default",
+              videos: [sectionDir],
+            });
+          }
+        }
+      }
     });
 
-    const courses = courseDirs.map(courseDir => {
-        const coursePath = path.join(MEDIA_PATH, courseDir);
-        const sections = [];
+    // Return a course object with the directory's name and sections
+    return {
+      course: courseDir,
+      sections: sections,
+    };
+  });
 
-        const sectionDirs = fs.readdirSync(coursePath);
-        sectionDirs.forEach(sectionDir => {
-            const sectionPath = path.join(coursePath, sectionDir);
-            if (fs.lstatSync(sectionPath).isDirectory()) {
-                // If it's a directory, it's a named section
-                const videos = fs.readdirSync(sectionPath).filter(file => !file.startsWith('.'));
-                sections.push({ name: sectionDir, videos: videos });
-            } else {
-                // If it's not a directory, it's a video in the default section
-                if (!sectionDir.startsWith('.')) { // Ignore system files
-                    const defaultSection = sections.find(s => s.name === "default");
-                    if (defaultSection) {
-                        defaultSection.videos.push(sectionDir);
-                    } else {
-                        sections.push({
-                            name: "default",
-                            videos: [sectionDir]
-                        });
-                    }
-                }
-            }
+  // Send the courses as the response
+  for (const course in courses) {
+    console.log(courses[course].course);
+    for (const section in courses[course].sections) {
+      courses[course].sections[section].videos = 
+        courses[course].sections[section].videos.sort((a, b) => {
+          // let stringA = String(a.title);
+          // let stringB = String(b.title);
+  
+          // Extract the numbers from the filenames
+          let numA = parseInt(a.match(/\d+/));
+          let numB = parseInt(b.match(/\d+/));
+  
+          // Compare the numbers
+          return numA - numB;
         });
+    }
+  }
 
-        return {
-            course: courseDir,
-            sections: sections
-        };
-    });
-
-    res.json(courses);
+  res.json(courses);
 });
-
 
 export default router;
