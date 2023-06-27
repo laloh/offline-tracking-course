@@ -245,18 +245,19 @@ router.get("/folders", async (req, res) => {
 
   // Send the courses as the response
   for (const course in courses) {
-    console.log(courses[course].course);
+    
+    // order names
+    courses[course].sections = courses[course].sections.sort((a, b) => {
+      let numA = parseInt(a.name.match(/\d+/));
+      let numB = parseInt(b.name.match(/\d+/));
+      return numA - numB;
+    });
+
     for (const section in courses[course].sections) {
       courses[course].sections[section].videos = 
         courses[course].sections[section].videos.sort((a, b) => {
-          // let stringA = String(a.title);
-          // let stringB = String(b.title);
-  
-          // Extract the numbers from the filenames
           let numA = parseInt(a.match(/\d+/));
           let numB = parseInt(b.match(/\d+/));
-  
-          // Compare the numbers
           return numA - numB;
         });
     }
