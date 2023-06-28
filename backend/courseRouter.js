@@ -255,30 +255,12 @@ router.get("/folders", async (req, res) => {
     // Return a course object with the directory's name and sections
     return {
       course: courseDir,
-      img: imgFile,
+      img: `http://localhost:8001/images/${courseDir}/${imgFile}`,
       sections: sections,
       path: coursePath,
     };
   });
 
-  // Send the courses as the response
-  for (const course in courses) {
-    courses[course].sections = courses[course].sections.sort((a, b) => {
-      let numA = parseInt(a.name.match(/\d+/));
-      let numB = parseInt(b.name.match(/\d+/));
-      return numA - numB;
-    });
-
-    for (const section in courses[course].sections) {
-      courses[course].sections[section].videos = courses[course].sections[
-        section
-      ].videos.sort((a, b) => {
-        let numA = parseInt(a.match(/\d+/));
-        let numB = parseInt(b.match(/\d+/));
-        return numA - numB;
-      });
-    }
-  }
 
   // insert course in database
   for (const course in courses) {
@@ -346,5 +328,51 @@ router.get("/folders", async (req, res) => {
 
   res.json(courses);
 });
+
+router.get('/videos', (req, res) => {
+  db.all('SELECT id, name as course, path, image as img FROM courses_2 ORDER BY name', (err, courses) => {
+    if (err) {
+      return console.error(err.message);
+    }
+    db.all('SELECT id, title as video, section as name, url, watched, course_id FROM videos_2 ORDER BY section, title', (err, videos) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      const output = [];
+
+      for (const course of courses) {
+        const courseVideos = videos.filter(video => video.course_id === course.id);
+        const sectionsMap = {};
+
+        for (const video of courseVideos) {
+          if (!sectionsMap[video.name]) {
+            sectionsMap[video.name] = {
+              name: video.name,
+              videos: [],
+              path: course.path,
+            };
+          }
+
+          sectionsMap[video.name].videos.push(video.url);
+          sectionsMap[video.name].videos.sort((a, b) => a.localeCompare(b, undefined, { numeric: true })); // Sorting videos
+        }
+
+        const sortedSections = Object.values(sectionsMap).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })); // Sorting sections
+
+        output.push({
+          course: course.course,
+          img: course.img,
+          sections: sortedSections,
+          path: course.path,
+        });
+      }
+
+      res.json(output);
+    });
+  });
+});
+
+
+
 
 export default router;
