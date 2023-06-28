@@ -360,6 +360,7 @@ router.get('/videos', (req, res) => {
         const sortedSections = Object.values(sectionsMap).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })); // Sorting sections
 
         output.push({
+          id: course.id,
           course: course.course,
           img: course.img,
           sections: sortedSections,
