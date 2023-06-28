@@ -22,7 +22,7 @@ export default function Course({params}) {
   
   return (
     <div className="flex">
-      <SideMenu courseId={id} onVideoSelection={handleVideoSelection}/>
+      <SideMenu courseId={id} course={course} onVideoSelection={handleVideoSelection}/>
       <div className="flex items-center justify-center flex-grow">
         <div className="mx-auto w-3/4 h-3/4">
           {loading ? <div>Loading...</div> : videoUrl && <VideoPlayer url={videoUrl} name={videoName}/>}

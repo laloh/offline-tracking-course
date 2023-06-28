@@ -34,20 +34,6 @@ const listDirectoryFiles = async (path) => {
   * PUT  /course/video
  --------------------------------------*/
 
-// API Endpoints
-router.get("/api/courses", async (req, res) => {
-  const sql = `SELECT * FROM courses`;
-
-  // return rows in json
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      throw err;
-    }
-
-    res.json(rows);
-  });
-});
-
 router.get("/api/media/courses", async (req, res) => {
   const mediaPath = path.resolve("./media");
   const courses = await fsPromises.readdir(mediaPath);
@@ -159,7 +145,7 @@ router.get("/images/:coursename/:filename", async (req, res) => {
 
 router.get("/videos/:courseName/:section?/:videoId", async (req, res) => {
   const { courseName, section, videoId } = req.params;
-  
+
   let videoPath;
 
   if (section) {
@@ -197,7 +183,7 @@ function isVideoFile(filename) {
   return VIDEO_EXTENSIONS.includes(path.extname(filename).toLowerCase());
 }
 
-router.get("/folders", async (req, res) => {
+router.get("/api/init", async (req, res) => {
   // Read the directories in the MEDIA_PATH
   // Filter out any items that are not directories
   const courseDirs = fs.readdirSync(MEDIA_PATH).filter((item) => {
@@ -205,15 +191,16 @@ router.get("/folders", async (req, res) => {
     return fs.lstatSync(itemPath).isDirectory();
   });
 
+  // Delete default directory
+  const defaultIndex = courseDirs.indexOf("default");
+  if (defaultIndex > -1) {
+    courseDirs.splice(defaultIndex, 1);
+  }
+
   // Map each course directory to a course object
   const courses = courseDirs.map((courseDir) => {
     // Get the files in the course directory
     const files = fs.readdirSync(path.join(MEDIA_PATH, courseDir));
-    // filter the first image file
-    const imgFile =
-      files.find((file) =>
-        IMAGE_EXTENSIONS.some((extension) => file.endsWith(extension))
-      ) || "cover.png";
 
     const coursePath = path.join(MEDIA_PATH, courseDir);
     const sections = [];
@@ -252,15 +239,25 @@ router.get("/folders", async (req, res) => {
       }
     });
 
+    // filter the first image file
+    const imgFile =
+      files.find((file) =>
+        IMAGE_EXTENSIONS.some((extension) => file.endsWith(extension))
+      ) || "cover.png";
+
+    const url =
+      imgFile === "cover.png"
+        ? `http://localhost:8001/images/default/${imgFile}`
+        : `http://localhost:8001/images/${courseDir}/${imgFile}`;
+
     // Return a course object with the directory's name and sections
     return {
       course: courseDir,
-      img: `http://localhost:8001/images/${courseDir}/${imgFile}`,
+      img: url,
       sections: sections,
       path: coursePath,
     };
   });
-
 
   // insert course in database
   for (const course in courses) {
@@ -329,51 +326,60 @@ router.get("/folders", async (req, res) => {
   res.json(courses);
 });
 
-router.get('/videos', (req, res) => {
-  db.all('SELECT id, name as course, path, image as img FROM courses_2 ORDER BY name', (err, courses) => {
-    if (err) {
-      return console.error(err.message);
-    }
-    db.all('SELECT id, title as video, section as name, url, watched, course_id FROM videos_2 ORDER BY section, title', (err, videos) => {
+router.get("/api/courses", (req, res) => {
+  db.all(
+    "SELECT id, name as course, path, image as img FROM courses_2 ORDER BY name",
+    (err, courses) => {
       if (err) {
         return console.error(err.message);
       }
-      const output = [];
+      db.all(
+        "SELECT id, title as video, section as name, url, watched, course_id FROM videos_2 ORDER BY section, title",
+        (err, videos) => {
+          if (err) {
+            return console.error(err.message);
+          }
+          const output = [];
 
-      for (const course of courses) {
-        const courseVideos = videos.filter(video => video.course_id === course.id);
-        const sectionsMap = {};
+          for (const course of courses) {
+            const courseVideos = videos.filter(
+              (video) => video.course_id === course.id
+            );
+            const sectionsMap = {};
 
-        for (const video of courseVideos) {
-          if (!sectionsMap[video.name]) {
-            sectionsMap[video.name] = {
-              name: video.name,
-              videos: [],
+            for (const video of courseVideos) {
+              if (!sectionsMap[video.name]) {
+                sectionsMap[video.name] = {
+                  name: video.name,
+                  videos: [],
+                  path: course.path,
+                };
+              }
+
+              sectionsMap[video.name].videos.push(video.url);
+              sectionsMap[video.name].videos.sort((a, b) =>
+                a.localeCompare(b, undefined, { numeric: true })
+              ); // Sorting videos
+            }
+
+            const sortedSections = Object.values(sectionsMap).sort((a, b) =>
+              a.name.localeCompare(b.name, undefined, { numeric: true })
+            ); // Sorting sections
+
+            output.push({
+              id: course.id,
+              course: course.course,
+              img: course.img,
+              sections: sortedSections,
               path: course.path,
-            };
+            });
           }
 
-          sectionsMap[video.name].videos.push(video.url);
-          sectionsMap[video.name].videos.sort((a, b) => a.localeCompare(b, undefined, { numeric: true })); // Sorting videos
+          res.json(output);
         }
-
-        const sortedSections = Object.values(sectionsMap).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })); // Sorting sections
-
-        output.push({
-          id: course.id,
-          course: course.course,
-          img: course.img,
-          sections: sortedSections,
-          path: course.path,
-        });
-      }
-
-      res.json(output);
-    });
-  });
+      );
+    }
+  );
 });
-
-
-
 
 export default router;

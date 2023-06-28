@@ -2,8 +2,8 @@ import Link from "next/link";
 
 export default function Cards({ course }) {
   const courseHref = `/course/${course.id}`;
-  const courseImg = course.image;
-
+  const courseImg = course.img;
+  console.log(course)
   return (
     <Link
       href={courseHref}
@@ -17,7 +17,7 @@ export default function Cards({ course }) {
 
       <div className="mt-2">
         <div>
-          <dd className="font-medium">{course.name}</dd>
+          <dd className="font-medium">{course.course}</dd>
         </div>
         <div>
           <div>

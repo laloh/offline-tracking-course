@@ -7,7 +7,7 @@ import axios from "axios";
 export default function Header() {
 
   const addCourses = async () => {
-    return axios.get("http://localhost:8001/api/media/courses").then((res) => {
+    return axios.get("http://localhost:8001/api/init").then((res) => {
       console.log(res.data);
     });
   }
