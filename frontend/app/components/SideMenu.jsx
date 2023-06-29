@@ -3,12 +3,10 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 
-export default function  SideMenu({ courseId, course, onVideoSelection }) {
-  const [videos, setVideos] = useState([]);
-  const [checkedStatus, setCheckedStatus] = useState([]);
+export default function SideMenu({ courseId, course, onVideoSelection }) {
+  const [videoStatus, setVideoStatus] = useState({});
 
   const onVideoSelected = (videoUrl, videoName) => {
-    // Notify the parent component
     onVideoSelection(videoUrl, videoName);
   };
 
@@ -16,38 +14,47 @@ export default function  SideMenu({ courseId, course, onVideoSelection }) {
     return axios.get(`http://localhost:8001/api/courses/${courseId}/videos`);
   };
 
-  const handleCheckboxChange = (index, videoId, courseId) => {
-    setCheckedStatus(
-      checkedStatus.map((value, i) => (i === index ? !value : value))
-    );
-
+  const handleCheckboxChange = (index, videoId, courseId, section) => {
+    // Create a deep copy of the videoStatus state
+    let newVideoStatus = JSON.parse(JSON.stringify(videoStatus));
+  
+    // Update the watched status
+    newVideoStatus[section][index].watched = !newVideoStatus[section][index].watched;
+  
     // Change db record to true or false
-    const watched = checkedStatus[index] ? 0 : 1;
+    const watched = newVideoStatus[section][index].watched;
+  
     axios.put(`http://localhost:8001/course/video`, {
       courseId: courseId,
       videoId: videoId,
-      watched: watched,
+      watched: watched ? 1 : 0,
     });
+  
+    // Update the state with the new object
+    setVideoStatus(newVideoStatus);
   };
 
-  const directoryVideos = (videos) => {
+  const directoryVideos = (videos, index, section) => {
     return (
-      <div className="px-4 py-6">
+      <div className="px-4 py-6" key={index}>
+        <h2 className="text-3xl font-bold text-gray-900 sm:text-3xl">
+          Section 1
+        </h2>
         <ul className="mt-6 space-y-1">
-          {videos.map((video, index) => (
-            <li key={index}>
+          {videos.map((video, videoIndex) => (
+            <li key={videoIndex}>
               <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
                 <input
-                  id={`checkbox-${index}`}
+                  id={`checkbox-${videoIndex}`}
                   type="checkbox"
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  checked={checkedStatus[index]}
+                  checked={video.watched ? true : false}
                   onChange={() =>
-                    handleCheckboxChange(index, video.id, video.course_id)
+                    handleCheckboxChange(videoIndex, video.id, video.course_id, section)
                   }
                 />
                 <label
-                  htmlFor={`checkbox-${index}`}
+                  htmlFor={`checkbox-${videoIndex}`}
                   className="w-full py-2 ml-1 text-sm font-medium text-gray-900 dark:text-black-300"
                 >
                   <a
@@ -71,28 +78,34 @@ export default function  SideMenu({ courseId, course, onVideoSelection }) {
       const sortedVideos = res.data.sort((a, b) => {
         let stringA = String(a.title);
         let stringB = String(b.title);
-
         // Extract the numbers from the filenames
         let numA = parseInt(stringA.match(/\d+/));
         let numB = parseInt(stringB.match(/\d+/));
-
         // Compare the numbers
         return numA - numB;
       });
 
-      setVideos(sortedVideos);
-      setCheckedStatus(
-        sortedVideos.map((video) => (video.watched === 1 ? true : false))
-      );
+      let dataGrouped = {};
+      sortedVideos.forEach((video) => {
+        const section = video.section;
+        // Initialize the array for this section if it does not exist yet
+        if (!dataGrouped[section]) {
+          dataGrouped[section] = [];
+        }
+        // Add the video to its section
+        dataGrouped[section].push(video);
+      });
+      setVideoStatus(dataGrouped);
+     
     });
   }, [courseId]);
 
   return (
     <div className="flex h-screen flex-col justify-between border-e bg-white">
       <div className="sticky inset-x-0 bottom-0 border-t border-gray-100">
-
-        {directoryVideos(videos)}
-
+        {Object.keys(videoStatus).map((section, index) =>
+          directoryVideos(videoStatus[section], index, section)
+        )}
       </div>
     </div>
   );

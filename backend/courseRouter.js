@@ -167,13 +167,14 @@ router.get("/videos/:courseName/:section?/:videoId", async (req, res) => {
 
 router.put("/course/video", async (req, res) => {
   const { courseId, videoId, watched } = req.body;
-  const sql = `UPDATE videos SET watched = ? WHERE id = ? and course_id = ?`;
+  const sql = `UPDATE videos_2 SET watched = ? WHERE id = ? and course_id = ?`;
 
   db.run(sql, [watched, videoId, courseId], function (err, result) {
     if (!err) {
       res.json({
         id: this.lastID,
         watched,
+        videoId
       });
     } else {
       console.log(err);
