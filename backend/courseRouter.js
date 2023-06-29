@@ -128,10 +128,19 @@ router.get("/api/media/courses", async (req, res) => {
 
 router.get("/api/courses/:id/videos", async (req, res) => {
   const { id } = req.params;
-  const data = await axios.get("http://localhost:8001/api/courses");
-  // find course by id
-  const courseVideos = data.data.find((course) => course.id === parseInt(id));
-  res.json(courseVideos);
+  const sql = `SELECT * FROM videos_2 WHERE course_id = ?`;
+  db.all(sql, [id], (err, rows) => {
+    if (err) {
+      throw err;
+    }
+    res.json(rows);
+  });
+  // const { id } = req.params;
+  // const data = await axios.get("http://localhost:8001/api/courses");
+  // // find course by id
+  // const courseVideos = data.data.find((course) => course.id === parseInt(id));
+  // res.json(courseVideos);
+
 });
 
 router.get("/images/:coursename/:filename", async (req, res) => {
