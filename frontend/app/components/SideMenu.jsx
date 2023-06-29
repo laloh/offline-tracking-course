@@ -3,7 +3,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 
-export default function SideMenu({ courseId, course, onVideoSelection }) {
+export default function  SideMenu({ courseId, course, onVideoSelection }) {
   const [videos, setVideos] = useState([]);
   const [checkedStatus, setCheckedStatus] = useState([]);
 

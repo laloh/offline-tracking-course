@@ -3,7 +3,6 @@ import Link from "next/link";
 export default function Cards({ course }) {
   const courseHref = `/course/${course.id}`;
   const courseImg = course.img;
-  console.log(course)
   return (
     <Link
       href={courseHref}

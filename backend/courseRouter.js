@@ -3,6 +3,7 @@ import db from "./database.js";
 import path from "path";
 import { promises as fsPromises } from "fs";
 import fs from "fs";
+import axios from "axios";
 
 const router = express.Router();
 
@@ -127,13 +128,10 @@ router.get("/api/media/courses", async (req, res) => {
 
 router.get("/api/courses/:id/videos", async (req, res) => {
   const { id } = req.params;
-  const sql = `SELECT * FROM videos WHERE course_id = ?`;
-  db.all(sql, [id], (err, rows) => {
-    if (err) {
-      throw err;
-    }
-    res.json(rows);
-  });
+  const data = await axios.get("http://localhost:8001/api/courses");
+  // find course by id
+  const courseVideos = data.data.find((course) => course.id === parseInt(id));
+  res.json(courseVideos);
 });
 
 router.get("/images/:coursename/:filename", async (req, res) => {
@@ -156,6 +154,7 @@ router.get("/videos/:courseName/:section?/:videoId", async (req, res) => {
 
   res.sendFile(videoPath);
 });
+
 
 router.put("/course/video", async (req, res) => {
   const { courseId, videoId, watched } = req.body;

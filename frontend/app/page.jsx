@@ -15,7 +15,6 @@ export default function HomePage() {
     fetchData().then((res) => {
       setCourses(res.data);
     });
-
   }, []);
 
   return (
