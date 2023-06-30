@@ -46,6 +46,7 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(255) NOT NULL,
             path VARCHAR(255) NOT NULL,
+            progress INTEGER DEFAULT 0,
             image VARCHAR(255) NOT NULL)`,
       (err) => {
         if (err) {

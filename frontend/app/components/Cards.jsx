@@ -27,12 +27,11 @@ export default function Cards({ course }) {
             <span
               role="progressbar"
               aria-labelledby="ProgressLabel"
-              aria-valuenow="75"
               className="block rounded-full bg-gray-200"
             >
               <span
-                className="block h-3 rounded-full bg-indigo-600"
-                style={{ width: "75%" }}
+                className="block h-3 rounded-full bg-green-500"
+                style={{ width: `${course.progress}%` }}
               ></span>
             </span>
           </div>
@@ -57,31 +56,7 @@ export default function Cards({ course }) {
 
             <div className="mt-1.5 sm:mt-0">
               <p className="text-gray-500">Progress</p>
-
-              <p className="font-medium">75%</p>
-            </div>
-          </div>
-
-          <div className="sm:inline-flex sm:shrink-0 sm:items-center sm:gap-2">
-            <svg
-              className="h-4 w-4 text-indigo-700"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-              />
-            </svg>
-
-            <div className="mt-1.5 sm:mt-0">
-              <p className="text-gray-500">Duration</p>
-
-              <p className="font-medium">24 Hours</p>
+              <p className="font-medium">{course.progress}%</p>
             </div>
           </div>
 
@@ -102,9 +77,9 @@ export default function Cards({ course }) {
             </svg>
 
             <div className="mt-1.5 sm:mt-0">
-              <p className="text-gray-500">Content</p>
+              <p className="text-gray-500">Videos</p>
 
-              <p className="font-medium">45 Videos</p>
+              <p className="font-medium">{course.content}</p>
             </div>
           </div>
         </div>

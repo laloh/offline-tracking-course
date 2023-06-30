@@ -135,12 +135,6 @@ router.get("/api/courses/:id/videos", async (req, res) => {
     }
     res.json(rows);
   });
-  // const { id } = req.params;
-  // const data = await axios.get("http://localhost:8001/api/courses");
-  // // find course by id
-  // const courseVideos = data.data.find((course) => course.id === parseInt(id));
-  // res.json(courseVideos);
-
 });
 
 router.get("/images/:coursename/:filename", async (req, res) => {
@@ -337,7 +331,7 @@ router.get("/api/init", async (req, res) => {
 
 router.get("/api/courses", (req, res) => {
   db.all(
-    "SELECT id, name as course, path, image as img FROM courses_2 ORDER BY name",
+    "SELECT id, name as course, path, image as img, progress FROM courses_2 ORDER BY name",
     (err, courses) => {
       if (err) {
         return console.error(err.message);
@@ -381,6 +375,8 @@ router.get("/api/courses", (req, res) => {
               img: course.img,
               sections: sortedSections,
               path: course.path,
+              progress: course.progress,
+              content: courseVideos.length, 
             });
           }
 
