@@ -38,8 +38,9 @@ export default function SideMenu({ courseId, course, onVideoSelection }) {
     return (
       <div className="px-4 py-6" key={index}>
         <h2 className="text-3xl font-bold text-gray-900 sm:text-3xl">
-          Section 1
+          Section {index}
         </h2>
+        <p>{section}</p>
         <ul className="mt-6 space-y-1">
           {videos.map((video, videoIndex) => (
             <li key={videoIndex}>
@@ -75,18 +76,9 @@ export default function SideMenu({ courseId, course, onVideoSelection }) {
 
   useEffect(() => {
     fetchData().then((res) => {
-      const sortedVideos = res.data.sort((a, b) => {
-        let stringA = String(a.title);
-        let stringB = String(b.title);
-        // Extract the numbers from the filenames
-        let numA = parseInt(stringA.match(/\d+/));
-        let numB = parseInt(stringB.match(/\d+/));
-        // Compare the numbers
-        return numA - numB;
-      });
-
+  
       let dataGrouped = {};
-      sortedVideos.forEach((video) => {
+      res.data.forEach((video) => {
         const section = video.section;
         // Initialize the array for this section if it does not exist yet
         if (!dataGrouped[section]) {
@@ -95,10 +87,32 @@ export default function SideMenu({ courseId, course, onVideoSelection }) {
         // Add the video to its section
         dataGrouped[section].push(video);
       });
-      setVideoStatus(dataGrouped);
-     
+  
+      // Use the function to sort the dataGrouped object by keys and titles
+      const sortedData = sortByKeyAndTitle(dataGrouped);
+  
+      setVideoStatus(sortedData);
+  
     });
   }, [courseId]);
+  
+  const sortByKeyAndTitle = (data) => {
+    const sortedKeys = Object.keys(data).sort((a, b) => {
+      const numA = parseInt(a.match(/\d+/));
+      const numB = parseInt(b.match(/\d+/));
+      return numA - numB;
+    });
+  
+    return sortedKeys.reduce((sortedData, key) => {
+      sortedData[key] = data[key].sort((a, b) => {
+        const numA = parseInt(a.title.match(/\d+/));
+        const numB = parseInt(b.title.match(/\d+/));
+        return numA - numB;
+      });
+      return sortedData;
+    }, {});
+  };
+  
 
   return (
     <div className="flex h-screen flex-col justify-between border-e bg-white">
