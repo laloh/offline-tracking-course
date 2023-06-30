@@ -128,7 +128,7 @@ router.get("/api/media/courses", async (req, res) => {
 
 router.get("/api/courses/:id/videos", async (req, res) => {
   const { id } = req.params;
-  const sql = `SELECT * FROM videos_2 WHERE course_id = ?`;
+  const sql = `SELECT * FROM videos WHERE course_id = ?`;
   db.all(sql, [id], (err, rows) => {
     if (err) {
       throw err;
@@ -161,7 +161,7 @@ router.get("/videos/:courseName/:section?/:videoId", async (req, res) => {
 
 router.put("/course/video", async (req, res) => {
   const { courseId, videoId, watched } = req.body;
-  const sql = `UPDATE videos_2 SET watched = ? WHERE id = ? and course_id = ?`;
+  const sql = `UPDATE videos SET watched = ? WHERE id = ? and course_id = ?`;
 
   db.run(sql, [watched, videoId, courseId], function (err, result) {
     if (!err) {
@@ -265,7 +265,7 @@ router.get("/api/init", async (req, res) => {
   // insert course in database
   for (const course in courses) {
     const courseExists = await new Promise((resolve, reject) => {
-      const sql = `SELECT * FROM courses_2 WHERE name = ?`;
+      const sql = `SELECT * FROM courses WHERE name = ?`;
       db.get(sql, [courses[course].course], (err, row) => {
         if (!err) {
           if (row) {
@@ -284,7 +284,7 @@ router.get("/api/init", async (req, res) => {
       continue;
     }
 
-    const sql = `INSERT INTO courses_2 (name, path, image) VALUES (?, ?, ?)`;
+    const sql = `INSERT INTO courses (name, path, image) VALUES (?, ?, ?)`;
     const params = [
       courses[course].course,
       courses[course].path,
@@ -298,7 +298,7 @@ router.get("/api/init", async (req, res) => {
         // insert sections in database
         for (const section in courses[course].sections) {
           for (const video of courses[course].sections[section].videos) {
-            const sql = `INSERT INTO videos_2 (title, section, url, watched, course_id) VALUES (?, ?, ?, ?, ?)`;
+            const sql = `INSERT INTO videos (title, section, url, watched, course_id) VALUES (?, ?, ?, ?, ?)`;
             const url =
               courses[course].sections[section].name === "default"
                 ? `http://localhost:8001/videos/${courses[course].course}/${video}`
@@ -331,13 +331,13 @@ router.get("/api/init", async (req, res) => {
 
 router.get("/api/courses", (req, res) => {
   db.all(
-    "SELECT id, name as course, path, image as img, progress FROM courses_2 ORDER BY name",
+    "SELECT id, name as course, path, image as img, progress FROM courses ORDER BY name",
     (err, courses) => {
       if (err) {
         return console.error(err.message);
       }
       db.all(
-        "SELECT id, title as video, section as name, url, watched, course_id FROM videos_2 ORDER BY section, title",
+        "SELECT id, title as video, section as name, url, watched, course_id FROM videos ORDER BY section, title",
         (err, videos) => {
           if (err) {
             return console.error(err.message);
