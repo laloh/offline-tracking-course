@@ -387,4 +387,49 @@ router.get("/api/courses", (req, res) => {
   );
 });
 
+router.put("/api/course/progress", (req, res) => {
+  const { course_id } = req.body;
+
+  // Use Promise.all to wait for both queries to complete
+  Promise.all([
+    new Promise((resolve, reject) => {
+      db.get(
+        `SELECT COUNT(*) as watched FROM videos WHERE course_id = ${course_id} AND watched = 1`,
+        (err, row) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(row.watched);
+          }
+        }
+      );
+    }),
+    new Promise((resolve, reject) => {
+      db.get(
+        `SELECT COUNT(*) as videos FROM videos WHERE course_id = ${course_id}`,
+        (err, row) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(row.videos);
+          }
+        }
+      );
+    })
+  ])
+    .then(([watched, videos]) => {
+      const progress = Math.round((watched / videos) * 100);
+      db.run(
+        `UPDATE courses SET progress = ${progress} WHERE id = ${course_id}`
+      );
+      res.json("Courses Updates Succesfully");
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: "An error occurred" });
+    });
+});
+
+
+
 export default router;

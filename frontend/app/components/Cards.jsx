@@ -1,8 +1,19 @@
 import Link from "next/link";
+import axios from "axios";
+import { useEffect } from "react";
 
 export default function Cards({ course }) {
   const courseHref = `/course/${course.id}`;
   const courseImg = course.img;
+
+  useEffect(() => {
+    axios.put("http://localhost:8001/api/course/progress", {
+        course_id: course.id,
+    }).then((res) => {
+      console.log(res.data);
+    })
+  }, [])
+
   return (
     <Link
       href={courseHref}

@@ -29,6 +29,9 @@ export default function SideMenu({ courseId, course, onVideoSelection }) {
       videoId: videoId,
       watched: watched ? 1 : 0,
     });
+
+    // update progress column in courses table
+    
   
     // Update the state with the new object
     setVideoStatus(newVideoStatus);
