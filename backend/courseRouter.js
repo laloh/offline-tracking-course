@@ -24,17 +24,6 @@ const listDirectoryFiles = async (path) => {
   }
 };
 
-/* --------------------------------------
-  * API Endpoint
-  * GET  /api/courses
-  * POST /api/courses
-  * GET  /api/media/courses
-  * GET  /api/courses/:id/videos
-  * GET  /images/:courseName/:fileName
-  * GET  /videos/:courseName/:videoId
-  * PUT  /course/video
- --------------------------------------*/
-
 router.get("/api/media/courses", async (req, res) => {
   const mediaPath = path.resolve("./media");
   const courses = await fsPromises.readdir(mediaPath);
