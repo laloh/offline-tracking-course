@@ -1,10 +1,10 @@
 # Build the backend image
 build-backend:
-	podman build -t localhost/backend -f backend/Dockerfile
+	podman build -t backend -f backend/Dockerfile
 
 # Build the frontend image
 build-frontend:
-	podman build -t localhost/frontend -f frontend/Dockerfile
+	podman build -t frontend -f frontend/Dockerfile
 
 # Run the backend and frontend images
 run:
