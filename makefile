@@ -8,5 +8,5 @@ build-frontend:
 
 # Run the backend and frontend images
 run:
-	podman run -dt -p 8001:8001/tcp -v ./backend/media:/app/media --privileged localhost/backend
+	podman run -dt -p 8001:8001/tcp -v ./backend/data:/app/data -v ./backend/media:/app/media --privileged localhost/backend
 	podman run -dt -p 3000:3000/tcp --privileged localhost/frontend

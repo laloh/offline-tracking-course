@@ -118,7 +118,7 @@ export default function SideMenu({ courseId, course, onVideoSelection }) {
   
 
   return (
-    <div className="flex h-screen flex-col justify-between border-e bg-white">
+    <div className="flex h-screen flex-col justify-between border-e bg-white overflow-y-scroll">
       <div className="sticky inset-x-0 bottom-0 border-t border-gray-100">
         {Object.keys(videoStatus).map((section, index) =>
           directoryVideos(videoStatus[section], index, section)
