@@ -21,6 +21,7 @@ export default function VideoPlayer({
         title={url}
         src={url}
         crossorigin=""
+        playbackRate="1.25"
       >
         <MediaOutlet/>
         <MediaCommunitySkin />
